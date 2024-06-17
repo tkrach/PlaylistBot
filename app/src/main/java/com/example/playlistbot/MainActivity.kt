@@ -1,17 +1,19 @@
 package com.example.playlistbot
 
 import android.content.Intent
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.OptIn
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.playlistbot.ui.theme.PlaylistBotTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -29,11 +31,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PlaylistBotTheme {
-                // A surface container using the 'background' color from the theme
                 Scaffold(
                     content = { paddingValues ->
                         Text(
-                            text = "Hello, World!",
+                            text = "Welcome to the unstable release of PlaylistBot!",
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(paddingValues)
@@ -42,9 +43,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
         val clientId = getString(R.string.spotify_client_id)
         val redirectUri = getString(R.string.spotify_redirect_uri)
-        // Initiate authentication
+
         val request = AuthorizationRequest.Builder(
             clientId,
             AuthorizationResponse.Type.TOKEN,
@@ -63,22 +65,24 @@ class MainActivity : ComponentActivity() {
             val response = AuthorizationClient.getResponse(resultCode, data)
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    // Successfully authenticated
                     val accessToken = response.accessToken
+                    saveAccessToken(accessToken)
                     Log.d("SpotifyAuth", "Access Token: $accessToken")
-                    // Proceed with making API calls using the accessToken
                 }
-
                 AuthorizationResponse.Type.ERROR -> {
-                    // Handle error response
                     Log.e("SpotifyAuth", "Auth error: ${response.error}")
                 }
-
                 else -> {
-                    // Handle other cases
                     Log.e("SpotifyAuth", "Auth result: ${response.type}")
                 }
             }
         }
+    }
+
+    private fun saveAccessToken(token: String) {
+        val sharedPreferences = getSharedPreferences("spotify_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("access_token", token)
+        editor.apply()
     }
 }
