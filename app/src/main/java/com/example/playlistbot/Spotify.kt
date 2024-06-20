@@ -2,6 +2,7 @@ package com.example.playlistbot
 
 import android.content.Context
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.json.JSONObject
 import java.io.IOException
 
@@ -13,7 +14,7 @@ class Spotify(private val context: Context) {
         val json = JSONObject()
         json.put("name", name)
         json.put("description", description)
-        val requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString())
+        val requestBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json.toString())
 
         val request = Request.Builder()
             .url("https://api.spotify.com/v1/users/{user_id}/playlists")

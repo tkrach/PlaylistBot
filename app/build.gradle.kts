@@ -70,4 +70,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.spotify.android:auth:1.2.5")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation ("androidx.compose.material3:material3")
 }

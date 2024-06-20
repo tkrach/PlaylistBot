@@ -1,12 +1,13 @@
 package com.example.playlistbot
 
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.json.JSONObject
 import java.io.IOException
 
 class ChatGPT {
     private val client = OkHttpClient()
-    private val apiKey = "YOUR_OPENAI_API_KEY"
+    private val apiKey = R.string.openAI_key
 
     fun chatWithGPT(query: String, callback: (String) -> Unit) {
         val json = JSONObject()
@@ -16,7 +17,7 @@ class ChatGPT {
             JSONObject().put("role", "user").put("content", query)
         ))
 
-        val requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString())
+        val requestBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json.toString())
 
         val request = Request.Builder()
             .url("https://api.openai.com/v1/chat/completions")
