@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/landingFragment">
+
+    <fragment
+        android:id="@+id/landingFragment"
+        android:name="com.example.playlistbot.LandingFragment"
+        tools:layout="@layout/fragment_landing" >
+        <action
+            android:id="@+id/action_landingFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.playlistbot.MainFragment"
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_mainFragment_to_generatePlaylistFragment"
+            app:destination="@id/generatePlaylistFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_enhancePlaylistFragment"
+            app:destination="@id/enhancePlaylistFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/generatePlaylistFragment"
+        android:name="com.example.playlistbot.GeneratePlaylistFragment"
+        tools:layout="@layout/fragment_generate_playlist" />
+
+    <fragment
+        android:id="@+id/enhancePlaylistFragment"
+        android:name="com.example.playlistbot.EnhancePlaylistFragment"
+        tools:layout="@layout/fragment_enhance_playlist" />
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.playlistbot.ChatFragment"
+        tools:layout="@layout/fragment_chat" />
+</navigation>
