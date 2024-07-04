@@ -6,17 +6,19 @@ import kotlinx.coroutines.withContext
 
 class Repository(private val context: Context) {
     private val spotifyService = Spotify(context)
-    private val openAIService = ChatGPT()
+    private val openAIService = ChatGPT(context)
 
-    suspend fun createPlaylist(description: String, numTracks: Int) = withContext(Dispatchers.IO) {
-        spotifyService.createPlaylist("PlaylistName", description) { response ->
-            // Handle the response from Spotify API
-        }
+    suspend fun createPlaylist(playlistName: String, description: String, numTracks: Int) = withContext(Dispatchers.IO) {
+
     }
 
-    suspend fun chatWithGPT(query: String) = withContext(Dispatchers.IO) {
+    suspend fun chatWithGPT(query: String, callback: (String) -> Unit) = withContext(Dispatchers.IO) {
         openAIService.chatWithGPT(query) { response ->
             // Handle the response from OpenAI API
         }
     }
+    suspend fun enhancePlaylist(playlistId: String, numTracks: Int) = withContext(Dispatchers.IO) {
+
+    }
+
 }

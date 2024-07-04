@@ -6,8 +6,8 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = Repository(application)
-    val authenticationState = MutableLiveData(false)
+    val authenticationState = mutableStateOf(false)
     private val context: Context = application.applicationContext
 
     companion object {
@@ -84,15 +84,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         editor.apply()
     }
 
-    fun createPlaylist(description: String, numTracks: Int) {
+    fun createPlaylist(name: String, description: String, numTracks: Int) {
         viewModelScope.launch {
-            repository.createPlaylist(description, numTracks)
+           repository.createPlaylist(name, description, numTracks)
         }
     }
 
-    fun chatWithGPT(query: String) {
+    fun chatWithGPT(query: String, callback: (String) -> Unit) {
         viewModelScope.launch {
-            repository.chatWithGPT(query)
+            Log.d("MainViewModel", "Sending query to GPT: $query")
+            ChatGPT(context).chatWithGPT(query) { result ->
+                Log.d("MainViewModel", "Received response from GPT: $result")
+                callback(result)
+            }
+        }
+    }
+
+    fun enhancePlaylist(playlistId: String, numTracks: Int) {
+        viewModelScope.launch {
+            repository.enhancePlaylist(playlistId, numTracks)
         }
     }
 }

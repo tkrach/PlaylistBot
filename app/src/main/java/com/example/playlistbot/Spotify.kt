@@ -36,9 +36,11 @@ class Spotify(private val context: Context) {
             }
         })
     }
-
     private fun getAccessToken(context: Context): String? {
         val sharedPreferences = context.getSharedPreferences("spotify_prefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("access_token", null)
+    }
+    fun searchTracks(query: String, callback: (List<String>) -> Unit) {
+
     }
 }

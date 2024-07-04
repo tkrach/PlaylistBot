@@ -1,58 +1,36 @@
 package com.example.playlistbot
 
-import androidx.activity.ComponentActivity
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
-    var description by remember { mutableStateOf("") }
-    var numTracks by remember { mutableStateOf("") }
-    val activity = LocalContext.current as? ComponentActivity
+fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
+    Log.d("MainScreen", "MainScreen Composable")
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Playlist Bot") })
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                TextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Playlist Description") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    value = numTracks,
-                    onValueChange = { numTracks = it },
-                    label = { Text("Number of Tracks") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { activity?.let { viewModel.authenticateSpotify(it) } }) {
-                    Text("Authenticate with Spotify")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { viewModel.createPlaylist(description, numTracks.toIntOrNull() ?: 0) }) {
-                    Text("Create Playlist")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { viewModel.chatWithGPT(description) }) {
-                    Text("Chat with GPT")
-                }
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = { navController.navigate("generatePlaylist") }) {
+            Text("Generate Playlist")
         }
-    )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { navController.navigate("enhancePlaylist") }) {
+            Text("Enhance Existing Playlist")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { navController.navigate("chat") }) {
+            Text("Talk to ChatGPT")
+        }
+    }
 }
