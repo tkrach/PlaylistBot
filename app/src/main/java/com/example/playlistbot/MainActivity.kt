@@ -1,5 +1,6 @@
 package com.example.playlistbot
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,5 +43,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        viewModel.handleAuthResponse(requestCode, resultCode, data)
     }
 }

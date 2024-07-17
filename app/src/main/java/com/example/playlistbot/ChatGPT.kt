@@ -7,10 +7,12 @@ import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import androidx.lifecycle.ViewModel
 
 class ChatGPT(private val context: Context) {
     private val client = OkHttpClient()
     private val apiKey = context.getString(R.string.openAI_key)
+    private val spotifyService = Spotify(context)
 
     fun chatWithGPT(query: String, callback: (String) -> Unit) {
         val json = JSONObject().apply {
@@ -58,12 +60,16 @@ class ChatGPT(private val context: Context) {
             }
         })
     }
-    fun generatePlaylist(description: String, numTracks: Int, callback: (String) -> Unit) {
+
+    fun createPlaylist(playlistName: String, description: String, numTracks: Int, callback: (String) -> Unit) {
         val json = JSONObject().apply {
             put("model", "gpt-3.5-turbo")
             put("messages", JSONArray().apply {
                 put(JSONObject().put("role", "system").put("content", "You are being used to " +
-                        "generate a playlist for users."))
+                        "generate a playlist for users. Please format your message in a numbered list " +
+                        "with exactly $numTracks entries, only providing the Artist name and the song name separated by a dash. If you " +
+                        "can't understand a user's input, just generate a playlist based on wahetever they entered." +
+                        "You have no functionality to speak with the user."))
                 put(JSONObject().put("role", "user").put("content", description))
             })
         }
@@ -92,7 +98,24 @@ class ChatGPT(private val context: Context) {
                                 .getJSONObject("message")
                                 .getString("content")
                             Log.d("ChatGPT", "Received response from GPT: $message")
-                            callback(message)
+
+                            val tracks = extractTracks(message)
+                            Log.d("ChatGPT", "Extracted tracks: $tracks")
+                            spotifyService.getCurrentUserId { userID ->
+                                if (userID != null) {
+                                    Log.d("ChatGPT", "User ID: $userID")
+                                    spotifyService.findTrackIDs(tracks) { trackIDs ->
+                                        spotifyService.createSpotifyPlaylist(
+                                            userID,
+                                            playlistName,
+                                            description,
+                                            trackIDs
+                                        ) { playlistResponse ->
+                                            callback(playlistResponse)
+                                        }
+                                    }
+                                    }
+                                }
                         } catch (e: Exception) {
                             Log.e("ChatGPT", "Failed to parse response: ${e.message}")
                             callback("Failed to parse response from ChatGPT")
@@ -104,5 +127,12 @@ class ChatGPT(private val context: Context) {
                 }
             }
         })
+    }
+
+    private fun extractTracks(response: String): List<Pair<String, String>> {
+        val regex = Regex("(\\d+)\\.\\s*(.+?)\\s*-\\s*(.+)")
+        return regex.findAll(response).map { matchResult ->
+            matchResult.groupValues[2] to matchResult.groupValues[3]
+        }.toList()
     }
 }

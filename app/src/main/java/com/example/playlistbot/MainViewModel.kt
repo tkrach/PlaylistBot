@@ -24,24 +24,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun authenticateSpotify(activity: ComponentActivity) {
+        Log.d("MainViewModel", "Authenticating Spotify")
         val accessToken = getAccessTokenFromStorage()
-        if (accessToken != null) {
-            showMessage("Authentication already successful!")
-            authenticationState.value = true
-            Log.d("SpotifyAuth", "Already authenticated with access token: $accessToken")
+        if (accessToken != null && !isTokenExpired()) {
+           authenticationState.value = true
         } else {
-            showMessage("Performing authentication...")
-            val clientId = context.getString(R.string.spotify_client_id)
-            val redirectUri = context.getString(R.string.spotify_redirect_uri)
-            val request = AuthorizationRequest.Builder(
-                clientId,
-                AuthorizationResponse.Type.TOKEN,
-                redirectUri
-            )
-                .setScopes(arrayOf("playlist-modify-public", "playlist-modify-private"))
-                .build()
-            AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request)
+            performSpotifyAuthentication(activity)
         }
+    }
+
+    private fun isTokenExpired(): Boolean {
+        Log.d("MainViewModel", "Checking if token is expired")
+        val sharedPreferences = context.getSharedPreferences("spotify_prefs", Context.MODE_PRIVATE)
+        val expiryTime = sharedPreferences.getLong("expiry_time", 0L)
+        Log.d("MainViewModel", "expire time is $expiryTime")
+        Log.d("MainViewModel", "current time is ${System.currentTimeMillis() / 1000}")
+        val currentTime = System.currentTimeMillis() / 1000
+        return currentTime >= expiryTime
+    }
+
+    private fun performSpotifyAuthentication(activity: ComponentActivity) {
+        Log.d("MainViewModel", "Performing Spotify authentication")
+        val clientId = context.getString(R.string.spotify_client_id)
+        val redirectUri = context.getString(R.string.spotify_redirect_uri)
+        val request = AuthorizationRequest.Builder(
+            clientId,
+            AuthorizationResponse.Type.TOKEN,
+            redirectUri
+        )
+            .setScopes(arrayOf("playlist-modify-public", "playlist-modify-private"))
+            .build()
+        AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request)
     }
 
     fun handleAuthResponse(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -50,43 +63,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
                     val accessToken = response.accessToken
-                    saveAccessToken(accessToken)
-                    showMessage("Authentication successful!")
+                    saveAccessToken(accessToken, response.expiresIn)
                     authenticationState.value = true
                 }
                 AuthorizationResponse.Type.ERROR -> {
-                    val errorMessage = "Authentication error: ${response.error}"
-                    showMessage(errorMessage)
-                    Log.e("SpotifyAuth", errorMessage)
+                    Log.e("SpotifyAuth", "Authentication error: ${response.error}")
                 }
                 else -> {
-                    val message = "Authentication result: ${response.type}"
-                    showMessage(message)
-                    Log.d("SpotifyAuth", message)
+                    Log.d("SpotifyAuth", "Authentication result: ${response.type}")
                 }
             }
         }
     }
 
     private fun getAccessTokenFromStorage(): String? {
+        Log.d("MainViewModel", "Getting access token from storage")
         val sharedPreferences = context.getSharedPreferences("spotify_prefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("access_token", null)
+
     }
 
-    private fun showMessage(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun saveAccessToken(token: String) {
+    private fun saveAccessToken(token: String, expiresIn: Int) {
+        Log.d("MainViewModel", "Saving access token to storage")
         val sharedPreferences = context.getSharedPreferences("spotify_prefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putString("access_token", token)
+        editor.putLong("expiry_time", System.currentTimeMillis() / 1000 + expiresIn)
         editor.apply()
+        Log.d("MainViewModel", "expire time is $expiresIn")
     }
-
     fun createPlaylist(name: String, description: String, numTracks: Int) {
         viewModelScope.launch {
-           repository.createPlaylist(name, description, numTracks)
+            repository.createPlaylist(name, description, numTracks)
         }
     }
 
@@ -103,6 +111,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun enhancePlaylist(playlistId: String, numTracks: Int) {
         viewModelScope.launch {
             repository.enhancePlaylist(playlistId, numTracks)
+        }
+    }
+    fun fetchSpotifyUserId(callback: (String?) -> Unit) {
+        viewModelScope.launch {
+            Spotify(context).getCurrentUserId { userId ->
+                Log.d("MainViewModel", "Fetched Spotify User ID: $userId")
+                callback(userId)
+            }
         }
     }
 }

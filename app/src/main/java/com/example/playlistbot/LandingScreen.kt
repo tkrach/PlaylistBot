@@ -20,7 +20,6 @@ fun LandingScreen(navController: NavHostController, viewModel: MainViewModel) {
 
     LaunchedEffect(authenticated) {
         if (authenticated) {
-            Log.d("LandingScreen", "Authenticated, navigating to main screen")
             navController.navigate("main") {
                 popUpTo("landing") { inclusive = true }
             }
