@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -111,14 +110,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun enhancePlaylist(playlistId: String, numTracks: Int) {
         viewModelScope.launch {
             repository.enhancePlaylist(playlistId, numTracks)
-        }
-    }
-    fun fetchSpotifyUserId(callback: (String?) -> Unit) {
-        viewModelScope.launch {
-            Spotify(context).getCurrentUserId { userId ->
-                Log.d("MainViewModel", "Fetched Spotify User ID: $userId")
-                callback(userId)
-            }
         }
     }
 }

@@ -7,7 +7,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import androidx.lifecycle.ViewModel
 
 class ChatGPT(private val context: Context) {
     private val client = OkHttpClient()

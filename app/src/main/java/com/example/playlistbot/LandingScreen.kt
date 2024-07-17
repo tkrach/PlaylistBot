@@ -11,8 +11,6 @@ import androidx.navigation.NavHostController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
-import android.util.Log
-
 
 @Composable
 fun LandingScreen(navController: NavHostController, viewModel: MainViewModel) {
