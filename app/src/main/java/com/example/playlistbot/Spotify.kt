@@ -70,14 +70,13 @@ class Spotify(private val context: Context) {
             }
         })
     }
-    fun findTrackIDs(tracks: List<Pair<String, String>>, callback: (List<String>) -> Unit) {
+    fun findTrackIDs(tracks: List<String>, callback: (List<String>) -> Unit) {
         Log.d("Spotify", "Finding track IDs...")
         val trackIDs = mutableListOf<String>()
         val accessToken = getAccessToken() ?: return
         Log.d("Spotify", "Access token: $accessToken")
-
-        tracks.forEach { (artist, song) ->
-            val url = "https://api.spotify.com/v1/search?q=track:$song%20artist:$artist&type=track"
+        tracks.forEach {track ->
+            val url = "https://api.spotify.com/v1/search?q=$track&type=track"
             val request = Request.Builder()
                 .url(url)
                 .addHeader("Authorization", "Bearer $accessToken")
@@ -104,7 +103,7 @@ class Spotify(private val context: Context) {
                                         .getString("id")
                                     trackIDs.add(trackID)
                                 } else {
-                                    Log.d("Spotify", "Track not found for: $song by $artist")
+                                    Log.d("Spotify", "Track not found for: $track")
                                 }
 
                                 // Check if we have collected all track IDs

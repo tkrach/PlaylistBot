@@ -65,10 +65,13 @@ class ChatGPT(private val context: Context) {
             put("model", "gpt-3.5-turbo")
             put("messages", JSONArray().apply {
                 put(JSONObject().put("role", "system").put("content", "You are being used to " +
-                        "generate a playlist for users. Please format your message in a numbered list " +
-                        "with exactly $numTracks entries, only providing the Artist name and the song name separated by a dash. If you " +
-                        "can't understand a user's input, just generate a playlist based on wahetever they entered." +
-                        "You have no functionality to speak with the user."))
+                        "generate a spotify playlist for users. Please format your message in a numbered list " +
+                        "with exactly $numTracks entries, \"Please only provide song and artist names surrounded by double quotes. Like this \\\"Accordion \"\n" +
+                        "\"- MF DOOM\\\" \" Also if the song is in another language please put it in the original language, like in kanji or katakana ONLY. If you " +
+                        "can't understand a user's input, just generate a playlist based on whatever they entered." +
+                        "You have no functionality to speak with the user. Additionally, try your best to include" +
+                        "tracks that are found on the spotify platform, as tracks from soundcloud, youtube, etc. " +
+                        "cannot be added. "))
                 put(JSONObject().put("role", "user").put("content", description))
             })
         }
@@ -128,10 +131,15 @@ class ChatGPT(private val context: Context) {
         })
     }
 
-    private fun extractTracks(response: String): List<Pair<String, String>> {
-        val regex = Regex("(\\d+)\\.\\s*(.+?)\\s*-\\s*(.+)")
-        return regex.findAll(response).map { matchResult ->
-            matchResult.groupValues[2] to matchResult.groupValues[3]
+    private fun extractTracks(response: String): List<String> {
+        Log.d("ChatGPT", "Extracting tracks from response: $response")
+        val regex = Regex("\"(.*?)\"")
+        val matches = regex.findAll(response)
+        Log.d("ChatGPT", "Matches found: ${matches.count()}")
+        return matches.map { matchResult ->
+            matchResult.groupValues[1].trim()
         }.toList()
     }
+
+
 }
